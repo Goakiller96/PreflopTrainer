@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Preflop Poker Trainer | 6-max</title>
+    <link rel="stylesheet" href="main.css">
+</head>
+<body>
+
+<div class="trainer">
+    <!-- ШАПКА -->
+    <div class="trainer__header">
+        <h1 class="trainer__title">
+    <a href="#" id="resetToSetup" style="text-decoration: none; color: inherit;">♢ Preflop Trainer</a>
+</h1>
+        <button class="trainer__stats-btn" id="statsBtn">📊 Статистика</button>
+    </div>
+
+    <!-- ЭКРАН НАСТРОЕК -->
+    <div id="setupPanel" class="setup">
+        <div class="setup__content">
+            <h2 class="setup__title">🎯 Настройки тренировки</h2>
+            
+            <!-- ВЫБОР РЕЖИМА -->
+            <div class="setup__mode">
+                <label class="setup__label">Режим тренировки:</label>
+                <div class="setup__mode-buttons">
+                    <button class="mode-btn active" data-mode="rfi">🎯 RFI</button>
+                    <button class="mode-btn" data-mode="3bet">⚡ 3BET</button>
+                    <button class="mode-btn" data-mode="vs3bet">🛡️ vs 3BET</button>
+                    <button class="mode-btn" data-mode="isolate">🎣 Isolate</button>
+                    <button class="mode-btn" data-mode="defend_bb">🛡️ Defend BB</button>
+                </div>
+            </div>
+            
+            <div class="setup__divider"></div>
+            
+            <!-- ВЫБОР РАЗМЕРА РЕЙЗА (только для Defend BB) -->
+            <div class="setup__raise-size" id="raiseSizeBlock" style="display: none;">
+                <label class="setup__label">Размер рейза оппонента:</label>
+                <div class="setup__size-buttons">
+                    <button class="size-btn" data-size="2.5">2.5 BB</button>
+                    <button class="size-btn active" data-size="3">3 BB</button>
+                    <button class="size-btn" data-size="both">🎲 Любой</button>
+                </div>
+            </div>
+            
+            <div class="setup__divider"></div>
+            
+            <!-- ВЫБОР ПОЗИЦИЙ -->
+            <div class="setup__positions">
+                <label class="setup__checkbox">
+                    <input type="checkbox" id="allPositions"> Все позиции (EP, MP, CO, BTN, SB, BB)
+                </label>
+                <div class="setup__specific" id="positionsList">
+                    <label><input type="checkbox" class="pos-check" value="ep"> EP</label>
+                    <label><input type="checkbox" class="pos-check" value="mp"> MP</label>
+                    <label><input type="checkbox" class="pos-check" value="co"> CO</label>
+                    <label><input type="checkbox" class="pos-check" value="btn"> BTN</label>
+                    <label><input type="checkbox" class="pos-check" value="sb"> SB</label>
+                    <label><input type="checkbox" class="pos-check" value="bb"> BB</label>
+                </div>
+            </div>
+            
+            <button class="setup__start-btn" id="startBtn">▶ СТАРТ</button>
+        </div>
+    </div>
+
+    <!-- ИГРОВОЙ ЭКРАН -->
+    <div id="gamePanel" style="display: none;">
+        <div class="situation-info" id="situationInfo"></div>
+        
+        <div class="table">
+            <div class="table__oval">
+                <!-- EP -->
+                <div class="position-wrapper position-wrapper--ep">
+                    <div class="position position--ep" data-pos="ep">EP</div>
+                    <div class="bet-chip bet-chip--ep"></div>
+                </div>
+                <!-- MP -->
+                <div class="position-wrapper position-wrapper--mp">
+                    <div class="position position--mp" data-pos="mp">MP</div>
+                    <div class="bet-chip bet-chip--mp"></div>
+                </div>
+                <!-- CO -->
+                <div class="position-wrapper position-wrapper--co">
+                    <div class="position position--co" data-pos="co">CO</div>
+                    <div class="bet-chip bet-chip--co"></div>
+                </div>
+                <!-- BTN -->
+                <div class="position-wrapper position-wrapper--btn">
+                    <div class="position position--btn" data-pos="btn">BTN</div>
+                    <div class="bet-chip bet-chip--btn"></div>
+                </div>
+                <!-- SB -->
+                <div class="position-wrapper position-wrapper--sb">
+                    <div class="position position--sb" data-pos="sb">SB</div>
+                    <div class="bet-chip bet-chip--sb"></div>
+                </div>
+                <!-- BB -->
+                <div class="position-wrapper position-wrapper--bb">
+                    <div class="position position--bb" data-pos="bb">BB</div>
+                    <div class="bet-chip bet-chip--bb"></div>
+                </div>
+                
+                <div class="table__center">
+                    <div class="hand" id="playerHand"></div>
+                    <div class="current-position" id="currentPosition"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="session-stats">
+            📈 Счёт: <span id="sessionCorrect">0</span> / <span id="sessionTotal">0</span> 
+            (<span id="sessionPercent">0</span>%)
+        </div>
+
+        <div class="actions" id="actionsPanel"></div>
+
+        <div class="result">
+            <div id="resultPanel">
+                <div class="result__message" id="resultMessage"></div>
+                <button class="result__next-btn" id="nextBtn">➜ СЛЕДУЮЩАЯ РУКА</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- МОДАЛЬНОЕ ОКНО СТАТИСТИКИ -->
+<div id="statsModal" class="modal">
+    <div class="modal__content">
+        <div class="modal__header">
+            <h2>📊 Статистика</h2>
+            <button class="modal__close" id="closeModalBtn">✖</button>
+        </div>
+        <div class="stats__item">
+            <span>Всего раздач:</span>
+            <span id="totalHands">0</span>
+        </div>
+        <div class="stats__item">
+            <span>Правильных ответов:</span>
+            <span id="correctHands">0</span>
+        </div>
+        <div class="stats__item">
+            <span>Точность:</span>
+            <span id="accuracy">0%</span>
+        </div>
+        <button class="stats__reset-btn" id="resetStatsBtn">🗑 Сбросить статистику</button>
+    </div>
+</div>
+
+<script src="main.js"></script>
+</body>
+</html>
