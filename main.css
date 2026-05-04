@@ -438,22 +438,100 @@ body {
     display: flex;
     justify-content: center;
     gap: clamp(8px, 3vw, 15px);
-    margin: 10px 0;
+    margin: 15px 0;
     flex-wrap: wrap;
     flex-shrink: 0;
+    padding: 0 10px;
 }
 
 .action-btn {
-    padding: clamp(6px, 2.5vw, 12px) clamp(12px, 5vw, 30px);
-    font-size: clamp(0.8rem, 3vw, 1.1rem);
+    padding: clamp(10px, 3.5vw, 14px) clamp(12px, 4vw, 25px);
+    font-size: clamp(0.75rem, 3.5vw, 1rem);
     font-weight: 700;
     border: none;
-    border-radius: 10px;
+    border-radius: 50px;
     cursor: pointer;
     transition: all 0.2s;
     flex: 0 1 auto;
+    min-width: 80px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: normal;
 }
 
+/* Для мобильных устройств - кнопки в столбик */
+@media (max-width: 500px) {
+    .actions {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+    }
+    
+    .action-btn {
+        width: 90%;
+        max-width: 260px;
+        min-width: 200px;
+        padding: 12px 16px;
+        font-size: 0.9rem;
+        white-space: normal;
+        word-break: keep-all;
+        line-height: 1.2;
+    }
+}
+
+/* Для очень маленьких телефонов */
+@media (max-width: 380px) {
+    .action-btn {
+        width: 95%;
+        min-width: 160px;
+        padding: 10px 12px;
+        font-size: 0.8rem;
+    }
+}
+
+/* Для телефонов с очень маленькой шириной */
+@media (max-width: 320px) {
+    .action-btn {
+        font-size: 0.7rem;
+        padding: 8px 10px;
+        min-width: 140px;
+    }
+}
+
+/* Альбомная ориентация на мобильных */
+@media (max-width: 768px) and (orientation: landscape) {
+    .actions {
+        flex-direction: row;
+        gap: 8px;
+    }
+    
+    .action-btn {
+        padding: 8px 12px;
+        font-size: 0.75rem;
+        min-width: 70px;
+        white-space: nowrap;
+    }
+}
+
+/* Десктопы */
+@media (min-width: 768px) {
+    .action-btn {
+        font-size: 1rem;
+        padding: 12px 24px;
+    }
+}
+
+/* Большие экраны */
+@media (min-width: 1200px) {
+    .action-btn {
+        font-size: 1.1rem;
+        padding: 14px 30px;
+    }
+}
+
+/* Специфические стили для каждой кнопки */
 .action-btn--fold {
     background: #c42d2d;
     color: white;
@@ -484,8 +562,29 @@ body {
     transform: translateY(-2px);
 }
 
+.action-btn--random {
+    background: #9b59b6;
+    color: white;
+}
+
+.action-btn--random:hover {
+    background: #af7ac5;
+    transform: translateY(-2px);
+}
+
 .action-btn:active {
     transform: translateY(0);
+}
+
+/* touch-устройства */
+@media (hover: none) and (pointer: coarse) {
+    .action-btn:hover {
+        transform: none;
+    }
+    
+    .action-btn:active {
+        transform: scale(0.97);
+    }
 }
 
 /* ===================== РЕЗУЛЬТАТ ===================== */
@@ -637,7 +736,7 @@ body {
 }
 
 @media (max-width: 480px) {
-    .action-btn { padding: 5px 10px; font-size: 0.7rem; }
+    .action-btn { padding: 14px 10px; font-size: 0.7rem; }
     .card { width: 42px; height: 60px; }
     .card__suit { font-size: 1.2rem; }
     .position { width: 32px; height: 32px; font-size: 0.6rem; }
@@ -649,7 +748,7 @@ body {
 @media (max-width: 380px) {
     .card { width: 35px; height: 50px; }
     .card__suit { font-size: 1rem; }
-    .action-btn { padding: 4px 8px; font-size: 0.65rem; }
+    .action-btn { padding: 14px 8px; font-size: 0.65rem; }
     .position { width: 28px; height: 28px; font-size: 0.55rem; }
 }
 
@@ -692,4 +791,59 @@ body {
 .action-btn--random:hover {
     background: #af7ac5;
     transform: translateY(-2px);
+}
+
+.action-btn--fold {
+    background: #c42d2d;
+    color: white;
+}
+
+.action-btn--fold:hover {
+    background: #e63c3c;
+    transform: translateY(-2px);
+}
+
+.action-btn--call {
+    background: #2a6b5e;
+    color: white;
+}
+
+.action-btn--call:hover {
+    background: #3a8b7e;
+    transform: translateY(-2px);
+}
+
+.action-btn--raise, .action-btn--3bet, .action-btn--4bet {
+    background: #00c97d;
+    color: #0f1b1a;
+}
+
+.action-btn--raise:hover, .action-btn--3bet:hover, .action-btn--4bet:hover {
+    background: #00ff9d;
+    transform: translateY(-2px);
+}
+
+.action-btn--random {
+    background: #9b59b6;
+    color: white;
+}
+
+.action-btn--random:hover {
+    background: #af7ac5;
+    transform: translateY(-2px);
+}
+
+.action-btn:active {
+    transform: translateY(0);
+}
+
+/* touch-устройства - убираем hover эффекты, оставляем active */
+@media (hover: none) and (pointer: coarse) {
+    .action-btn:hover {
+        transform: none;
+    }
+    
+    .action-btn:active {
+        transform: scale(0.97);
+    }
 }
