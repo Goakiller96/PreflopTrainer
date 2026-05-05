@@ -250,7 +250,7 @@ body {
     justify-content: space-between;
     height: 100%;
     min-height: 0;
-    overflow: hidden;
+    /* overflow: hidden; */
 }
 
 .situation-info {
@@ -261,7 +261,7 @@ body {
 .table {
     display: flex;
     justify-content: center;
-    margin: 5px 0;
+    margin: 23px 0;
     overflow: visible;
     flex-shrink: 1;
     flex-grow: 1;
@@ -291,10 +291,10 @@ body {
 
 /* Позиции обёрток */
 .position-wrapper--ep   { top: 18%; left: 10%; transform: translate(-50%, -50%); }
-.position-wrapper--mp   { top: 4%; left: 50%; transform: translate(-50%, -50%); }
+.position-wrapper--mp   { top: -2%; left: 50%; transform: translate(-50%, -50%); }
 .position-wrapper--co   { top: 18%; right: 10%; transform: translate(50%, -50%); }
 .position-wrapper--btn  { bottom: 16%; right: 12%; transform: translate(50%, 50%); }
-.position-wrapper--sb   { bottom: 4%; left: 50%; transform: translate(-50%, 50%); }
+.position-wrapper--sb   { bottom: -2%; left: 50%; transform: translate(-50%, 50%); }
 .position-wrapper--bb   { bottom: 16%; left: 12%; transform: translate(-50%, 50%); }
 
 /* Сам кружок позиции */
@@ -337,20 +337,20 @@ body {
 
 /* Расположение планок относительно кружков (ближе к центру стола) */
 .position-wrapper--ep .bet-chip { top: 50%; right: -60px; transform: translateY(-50%); }
-.position-wrapper--mp .bet-chip { top: 50%; right: -60px; transform: translateY(-50%); }
+.position-wrapper--mp .bet-chip { top: 100%; right: -50px; transform: translateY(-50%); }
 .position-wrapper--co .bet-chip { top: 50%; left: -60px; transform: translateY(-50%); }
 .position-wrapper--btn .bet-chip { bottom: 50%; left: -60px; transform: translateY(50%); }
-.position-wrapper--sb .bet-chip { bottom: 50%; left: -60px; transform: translateY(50%); }
+.position-wrapper--sb .bet-chip { bottom: 100%; left: -50px; transform: translateY(50%); }
 .position-wrapper--bb .bet-chip { bottom: 50%; right: -60px; transform: translateY(50%); }
 
 /* Адаптация для маленьких экранов */
 @media (max-width: 480px) {
-    .position-wrapper--ep .bet-chip { right: -12px; }
-    .position-wrapper--mp .bet-chip { right: -12px; }
-    .position-wrapper--co .bet-chip { left: -12px; }
-    .position-wrapper--btn .bet-chip { left: -12px; }
-    .position-wrapper--sb .bet-chip { left: -12px; }
-    .position-wrapper--bb .bet-chip { right: -12px; }
+    .position-wrapper--ep .bet-chip { right: -36px; }
+    .position-wrapper--mp .bet-chip { right: -32px; top: 33px;}
+    .position-wrapper--co .bet-chip { left: -36px; }
+    .position-wrapper--btn .bet-chip { left: -36px; }
+    .position-wrapper--sb .bet-chip { left: -28px; bottom: 36px;}
+    .position-wrapper--bb .bet-chip { right: -36px; }
     
     .bet-chip {
         padding: 1px 4px;
@@ -424,7 +424,7 @@ body {
 /* ===================== СТАТИСТИКА ===================== */
 .session-stats {
     text-align: center;
-    margin: 5px auto;
+    margin: 30px auto;
     padding: 4px 12px;
     font-size: clamp(0.8rem, 3vw, 1rem);
     background: #1a2b2a;
@@ -527,7 +527,7 @@ body {
 @media (min-width: 1200px) {
     .action-btn {
         font-size: 1.1rem;
-        padding: 14px 30px;
+        padding: 11px 30px;
     }
 }
 
@@ -736,7 +736,7 @@ body {
 }
 
 @media (max-width: 480px) {
-    .action-btn { padding: 14px 10px; font-size: 0.7rem; }
+    .action-btn { padding: 16px 10px; font-size: 1.3rem; }
     .card { width: 42px; height: 60px; }
     .card__suit { font-size: 1.2rem; }
     .position { width: 32px; height: 32px; font-size: 0.6rem; }
@@ -748,7 +748,7 @@ body {
 @media (max-width: 380px) {
     .card { width: 35px; height: 50px; }
     .card__suit { font-size: 1rem; }
-    .action-btn { padding: 14px 8px; font-size: 0.65rem; }
+    .action-btn { padding: 14px 8px; font-size: 1.3rem; }
     .position { width: 28px; height: 28px; font-size: 0.55rem; }
 }
 
@@ -796,6 +796,7 @@ body {
 .action-btn--fold {
     background: #c42d2d;
     color: white;
+    
 }
 
 .action-btn--fold:hover {
