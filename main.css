@@ -34,7 +34,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 30px;
+    margin-bottom: 25px;
     padding: 0 10px;
     flex-wrap: wrap;
     gap: 10px;
@@ -736,7 +736,7 @@ body {
 }
 
 @media (max-width: 480px) {
-    .action-btn { padding: 14px 10px; font-size: 1.3rem; }
+    .action-btn { padding: 12px 10px; font-size: 1.3rem; }
     .card { width: 42px; height: 60px; }
     .card__suit { font-size: 1.2rem; }
     .position { width: 32px; height: 32px; font-size: 0.6rem; }
