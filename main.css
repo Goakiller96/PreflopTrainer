@@ -848,3 +848,22 @@ body {
         transform: scale(0.97);
     }
 }
+
+.stats__error-btn {
+    margin-top: 15px;
+    width: 100%;
+    padding: clamp(8px, 2.5vw, 12px);
+    background: #ff6600;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: clamp(0.85rem, 3vw, 1rem);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.stats__error-btn:hover {
+    background: #ff8800;
+    transform: translateY(-2px);
+}
+

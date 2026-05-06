@@ -12,8 +12,8 @@
     <!-- ШАПКА -->
     <div class="trainer__header">
         <h1 class="trainer__title">
-    <a href="#" id="resetToSetup" style="text-decoration: none; color: inherit;">♢ Preflop Trainer</a>
-</h1>
+            <a href="#" id="resetToSetup" style="text-decoration: none; color: inherit;">♢ Preflop Trainer</a>
+        </h1>
         <button class="trainer__stats-btn" id="statsBtn">📊 Статистика</button>
     </div>
 
@@ -22,7 +22,6 @@
         <div class="setup__content">
             <h2 class="setup__title">🎯 Настройки тренировки</h2>
             
-            <!-- ВЫБОР РЕЖИМА -->
             <div class="setup__mode">
                 <label class="setup__label">Режим тренировки:</label>
                 <div class="setup__mode-buttons">
@@ -36,7 +35,6 @@
             
             <div class="setup__divider"></div>
             
-            <!-- ВЫБОР РАЗМЕРА РЕЙЗА (только для Defend BB) -->
             <div class="setup__raise-size" id="raiseSizeBlock" style="display: none;">
                 <label class="setup__label">Размер рейза оппонента:</label>
                 <div class="setup__size-buttons">
@@ -48,7 +46,6 @@
             
             <div class="setup__divider"></div>
             
-            <!-- ВЫБОР ПОЗИЦИЙ -->
             <div class="setup__positions">
                 <label class="setup__checkbox">
                     <input type="checkbox" id="allPositions"> Все позиции (EP, MP, CO, BTN, SB, BB)
@@ -73,32 +70,26 @@
         
         <div class="table">
             <div class="table__oval">
-                <!-- EP -->
                 <div class="position-wrapper position-wrapper--ep">
                     <div class="position position--ep" data-pos="ep">EP</div>
                     <div class="bet-chip bet-chip--ep"></div>
                 </div>
-                <!-- MP -->
                 <div class="position-wrapper position-wrapper--mp">
                     <div class="position position--mp" data-pos="mp">MP</div>
                     <div class="bet-chip bet-chip--mp"></div>
                 </div>
-                <!-- CO -->
                 <div class="position-wrapper position-wrapper--co">
                     <div class="position position--co" data-pos="co">CO</div>
                     <div class="bet-chip bet-chip--co"></div>
                 </div>
-                <!-- BTN -->
                 <div class="position-wrapper position-wrapper--btn">
                     <div class="position position--btn" data-pos="btn">BTN</div>
                     <div class="bet-chip bet-chip--btn"></div>
                 </div>
-                <!-- SB -->
                 <div class="position-wrapper position-wrapper--sb">
                     <div class="position position--sb" data-pos="sb">SB</div>
                     <div class="bet-chip bet-chip--sb"></div>
                 </div>
-                <!-- BB -->
                 <div class="position-wrapper position-wrapper--bb">
                     <div class="position position--bb" data-pos="bb">BB</div>
                     <div class="bet-chip bet-chip--bb"></div>
@@ -114,6 +105,7 @@
         <div class="session-stats">
             📈 Счёт: <span id="sessionCorrect">0</span> / <span id="sessionTotal">0</span> 
             (<span id="sessionPercent">0</span>%)
+            <span id="errorModeIndicator" style="display: none; margin-left: 10px; padding: 2px 8px; background: #ff6600; border-radius: 20px; font-size: 0.7rem;">🔴 РАБОТА НАД ОШИБКАМИ</span>
         </div>
 
         <div class="actions" id="actionsPanel"></div>
@@ -146,7 +138,12 @@
             <span>Точность:</span>
             <span id="accuracy">0%</span>
         </div>
+        <div class="stats__item">
+            <span>Ошибок в копилке:</span>
+            <span id="errorCount">0</span>
+        </div>
         <button class="stats__reset-btn" id="resetStatsBtn">🗑 Сбросить статистику</button>
+        <button class="stats__error-btn" id="reviewErrorsBtn">🔄 Решить ошибки</button>
     </div>
 </div>
 

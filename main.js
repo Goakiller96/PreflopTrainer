@@ -1,4 +1,4 @@
-// ===================== main.js (ПОЛНАЯ ВЕРСИЯ) =====================
+// ===================== main.js (ПОЛНАЯ РАБОЧАЯ ВЕРСИЯ) =====================
 document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ Preflop Trainer запущен');
 
@@ -12,21 +12,26 @@ document.addEventListener('DOMContentLoaded', function() {
     const resultPanel = document.getElementById('resultPanel');
     const resultMessage = document.getElementById('resultMessage');
     const nextBtn = document.getElementById('nextBtn');
+    const foldBtn = document.getElementById('foldBtn');
+    const raiseBtn = document.getElementById('raiseBtn');
     const sessionCorrectSpan = document.getElementById('sessionCorrect');
     const sessionTotalSpan = document.getElementById('sessionTotal');
     const sessionPercentSpan = document.getElementById('sessionPercent');
     const situationInfo = document.getElementById('situationInfo');
     const actionsPanel = document.getElementById('actionsPanel');
     const raiseSizeBlock = document.getElementById('raiseSizeBlock');
+    const errorModeIndicator = document.getElementById('errorModeIndicator');
     
     // ---------- Элементы статистики ----------
     const statsModal = document.getElementById('statsModal');
     const statsBtn = document.getElementById('statsBtn');
     const closeModalBtn = document.getElementById('closeModalBtn');
     const resetStatsBtn = document.getElementById('resetStatsBtn');
+    const reviewErrorsBtn = document.getElementById('reviewErrorsBtn');
     const totalHandsSpan = document.getElementById('totalHands');
     const correctHandsSpan = document.getElementById('correctHands');
     const accuracySpan = document.getElementById('accuracy');
+    const errorCountSpan = document.getElementById('errorCount');
 
     // ---------- Переменные ----------
     let selectedPositions = [];
@@ -36,6 +41,11 @@ document.addEventListener('DOMContentLoaded', function() {
     let selectedRaiseSize = '3';
     let stats = { total: 0, correct: 0 };
     let sessionStats = { total: 0, correct: 0 };
+    
+    // Массив для хранения ошибок
+    let errorHands = [];
+    let isErrorMode = false;
+    let currentErrorIndex = 0;
 
     // ==================== КОЛОДА ====================
     const ranks = ['2','3','4','5','6','7','8','9','T','J','Q','K','A'];
@@ -62,184 +72,78 @@ document.addEventListener('DOMContentLoaded', function() {
         sb: new Set(['AA','KK','QQ','JJ','TT','99','88','77','66','55','44','33','AKs','AQs','AJs','ATs','A9s','A8s','A7s','A6s','A5s','A4s','A3s','A2s','KQs','KJs','KTs','K9s','K8s','K7s','K6s','K5s','K4s','K3s','K2s','QJs','QTs','Q9s','Q8s','Q7s','Q6s','Q5s','Q4s','Q3s','Q2s','JTs','J9s','J8s','J7s','J6s','J5s','J4s','T9s','T8s','T7s','T6s','98s','97s','96s','87s','86s','85s','76s','75s','65s','64s','54s','AKo','AQo','AJo','ATo','A9o','A8o','A7o','A6o','A5o','A4o','A3o','KQo','KJo','KTo','K9o','QJo','QTo','Q9o','JTo','J9o','T9o'])
     };
 
-    // ==================== ДИАПАЗОНЫ ЗАЩИТЫ BB ПРОТИВ EP ====================
+    // ==================== ДИАПАЗОНЫ ЗАЩИТЫ BB ====================
+    
     const callRangeEP30 = new Set([
         '99', '88', '77', '66', '55', '44', '33', '22',
         'A9s', 'A8s', 'A7s', 'A6s', 'A2s',
-        'K9s',
-        'T9s', 'T8s',
-        '98s', '87s', '76s', '65s', '54s',
+        'K9s', 'T9s', 'T8s', '98s', '87s', '76s', '65s', '54s',
         'AQo', 'KQo'
     ]);
     
     const extraCallRangeEP25 = new Set([
-        'K8s', 'K7s', 'K6s', 'K5s',
-        'Q9s',
-        'J9s',
-        '97s',
-        '86s',
-        '75s',
-        '64s',
-        '53s',
-        '43s',
-        'AJo'
+        'K8s', 'K7s', 'K6s', 'K5s', 'Q9s', 'J9s', '97s', '86s', '75s', '64s', '53s', '43s', 'AJo'
     ]);
-
-    // ==================== ДИАПАЗОНЫ ЗАЩИТЫ BB ПРОТИВ MP ====================
+    
     const callRangeMP30 = new Set([
         '88', '77', '66', '55', '44', '33', '22',
         'A9s', 'A8s', 'A7s', 'A6s', 'A2s',
-        'K9s', 'K8s',
-        'Q9s',
-        'J9s',
-        'T9s', 'T8s',
-        '98s', '97s',
-        '87s', '86s',
-        '76s', '75s',
-        '65s', '64s',
-        '54s',
+        'K9s', 'K8s', 'Q9s', 'J9s', 'T9s', 'T8s', '98s', '97s', '87s', '86s', '76s', '75s', '65s', '64s', '54s',
         'AQo', 'KQo'
     ]);
     
     const extraCallRangeMP25 = new Set([
-        'K7s', 'K6s', 'K5s',
-        'Q8s',
-        'J8s',
-        '53s', '43s',
-        'AJo', 'ATo',
-        'KJo', 'QJo'
+        'K7s', 'K6s', 'K5s', 'Q8s', 'J8s', '53s', '43s', 'AJo', 'ATo', 'KJo', 'QJo'
     ]);
-
-    // ==================== ДИАПАЗОНЫ ЗАЩИТЫ BB ПРОТИВ CO ====================
+    
     const callRangeCO30 = new Set([
         '88', '77', '66', '55', '44', '33', '22',
         'A9s', 'A8s', 'A7s', 'A6s', 'A2s',
-        'K9s', 'K8s', 'K7s', 'K6s',
-        'Q9s',
-        'J9s',
-        'T9s', 'T8s',
-        '98s', '97s',
-        '87s', '86s',
-        '76s', '75s',
-        '65s', '64s',
-        '54s', '53s',
-        '43s',
-        'AJo', 'ATo',
-        'KQo', 'KJo',
-        'QJo'
+        'K9s', 'K8s', 'K7s', 'K6s', 'Q9s', 'J9s', 'T9s', 'T8s', '98s', '97s', '87s', '86s', '76s', '75s', '65s', '64s', '54s', '53s', '43s',
+        'AJo', 'ATo', 'KQo', 'KJo', 'QJo'
     ]);
     
     const extraCallRangeCO25 = new Set([
-        'K5s', 'K4s', 'K3s', 'K2s',
-        'Q8s', 'Q7s', 'Q6s',
-        'J8s',
-        'KTo', 'QTo'
+        'K5s', 'K4s', 'K3s', 'K2s', 'Q8s', 'Q7s', 'Q6s', 'J8s', 'KTo', 'QTo'
     ]);
-
-    // ==================== ДИАПАЗОНЫ ЗАЩИТЫ BB ПРОТИВ BTN ====================
+    
     const callRangeBTN30 = new Set([
         '88', '77', '66', '55', '44', '33', '22',
         'A8s', 'A7s', 'A3s', 'A2s',
         'K8s', 'K7s', 'K6s', 'K5s', 'K4s', 'K3s', 'K2s',
-        'Q7s', 'Q6s', 'Q5s',
-        'J7s',
-        'T7s',
-        '97s',
-        '87s', '86s',
-        '75s',
-        '64s',
-        '43s',
-        'KTo',
-        'QJo', 'QTo',
-        'JTo'
+        'Q7s', 'Q6s', 'Q5s', 'J7s', 'T7s', '97s', '87s', '86s', '75s', '64s', '43s',
+        'KTo', 'QJo', 'QTo', 'JTo'
     ]);
     
     const extraCallRangeBTN25 = new Set([
-        'A6s',
-        'J6s', 'J5s',
-        'T6s',
-        '96s',
-        '85s',
-        '74s',
-        '53s',
-        'A8o'
+        'A6s', 'J6s', 'J5s', 'T6s', '96s', '85s', '74s', '53s', 'A8o'
     ]);
-
-    // ==================== ДИАПАЗОНЫ ЗАЩИТЫ BB ПРОТИВ SB ====================
+    
     const callRangeSB30 = new Set([
         '77', '66', '55', '44', '33', '22',
         'A9s', 'A8s', 'A7s', 'A6s', 'A4s', 'A3s', 'A2s',
         'KTs', 'K9s', 'K8s', 'K7s', 'K6s', 'K5s', 'K4s', 'K3s', 'K2s',
         'QTs', 'Q9s', 'Q8s', 'Q7s', 'Q6s',
         'JTs', 'J9s', 'J8s', 'J7s',
-        'T8s', 'T7s',
-        '97s',
-        '86s',
-        '75s',
-        '64s',
-        '43s',
-        'ATo', 'A9o',
-        'KQo', 'KTo',
-        'QJo', 'QTo',
-        'JTo'
+        'T8s', 'T7s', '97s', '86s', '75s', '64s', '43s',
+        'ATo', 'A9o', 'KQo', 'KTo', 'QJo', 'QTo', 'JTo'
     ]);
     
-    const extraCallRangeSB25 = new Set([
-        '85s',
-        '74s',
-        '53s'
-    ]);
-
-    // ==================== ОБЩИЕ ДИАПАЗОНЫ ====================
+    const extraCallRangeSB25 = new Set(['85s', '74s', '53s']);
     
-    // Базовый диапазон 50/50
     const randomRange50 = new Set([
-        '99',
-        'AJs', 'ATs',
-        'A5s', 'A4s', 'A3s',
-        'KJs', 'KTs',
-        'QJs', 'QTs',
-        'JTs',
-        'AQo'
+        '99', 'AJs', 'ATs', 'A5s', 'A4s', 'A3s', 'KJs', 'KTs', 'QJs', 'QTs', 'JTs', 'AQo'
     ]);
     
-    // Диапазон 50/50 для BTN (расширенный)
     const randomRangeBTN50 = new Set([
-        '99',
-        'A9s',
-        'K9s',
-        'Q9s', 'Q8s',
-        'J9s', 'J8s',
-        'T9s', 'T8s',
-        '98s',
-        '87s',
-        '76s',
-        '65s',
-        '54s',
-        'AJo', 'A9o',
-        'KQo', 'KJo'
+        '99', 'A9s', 'K9s', 'Q9s', 'Q8s', 'J9s', 'J8s', 'T9s', 'T8s', '98s', '87s', '76s', '65s', '54s', 'AJo', 'A9o', 'KQo', 'KJo'
     ]);
     
-    // Диапазон 50/50 для SB (расширенный)
     const randomRangeSB50 = new Set([
-        'A5s',
-        'Q5s', 'Q4s', 'Q3s', 'Q2s',
-        'J6s', 'J5s', 'J4s', 'J3s', 'J2s',
-        'T9s', 'T6s', 'T5s', 'T4s', 'T3s', 'T2s',
-        '98s', '96s', '95s',
-        '87s',
-        '76s',
-        '65s',
-        '54s',
-        'A8o', 'A7o', 'A6o', 'A5o', 'A4o', 'A3o', 'A2o',
-        'K9o', 'K8o',
-        'Q9o',
-        'J9o',
-        'T9o', 'T8o',
-        '98o'
+        'A5s', 'Q5s', 'Q4s', 'Q3s', 'Q2s', 'J6s', 'J5s', 'J4s', 'J3s', 'J2s', 'T9s', 'T6s', 'T5s', 'T4s', 'T3s', 'T2s', '98s', '96s', '95s', '87s', '76s', '65s', '54s',
+        'A8o', 'A7o', 'A6o', 'A5o', 'A4o', 'A3o', 'A2o', 'K9o', 'K8o', 'Q9o', 'J9o', 'T9o', 'T8o', '98o'
     ]);
     
-    // Базовый диапазон 3бета
     const threebetRange = new Set([
         'AA', 'KK', 'QQ', 'JJ', 'TT',
         'AKs', 'AQs', 'AJs', 'ATs',
@@ -249,18 +153,15 @@ document.addEventListener('DOMContentLoaded', function() {
         'AKo'
     ]);
     
-    // Диапазон 3бета для BTN (расширенный)
     const threebetRangeBTN = new Set([
         'AA', 'KK', 'QQ', 'JJ', 'TT',
-        'AKs', 'AQs', 'AJs', 'ATs',
-        'A5s', 'A4s',
+        'AKs', 'AQs', 'AJs', 'ATs', 'A5s', 'A4s',
         'KQs', 'KJs', 'KTs',
         'QJs', 'QTs',
         'JTs',
         'AKo', 'AQo'
     ]);
     
-    // Диапазон 3бета для SB (расширенный)
     const threebetRangeSB = new Set([
         'AA', 'KK', 'QQ', 'JJ', 'TT', '99', '88',
         'AKs', 'AQs', 'AJs', 'ATs',
@@ -268,79 +169,7 @@ document.addEventListener('DOMContentLoaded', function() {
         'QJs',
         'AKo', 'AQo', 'AJo'
     ]);
-
-    // Функция определения действия для защиты BB
-    function getDefendBBAction(handCode, raiseSize, villainPos) {
-        // Для BTN используем расширенные диапазоны
-        if (villainPos === 'btn') {
-            if (threebetRangeBTN.has(handCode)) {
-                return 'raise';
-            }
-            if (randomRangeBTN50.has(handCode)) {
-                return 'random';
-            }
-            if (callRangeBTN30.has(handCode)) {
-                return 'call';
-            }
-            if (raiseSize === 2.5 && extraCallRangeBTN25.has(handCode)) {
-                return 'call';
-            }
-            return 'fold';
-        }
-        
-        // Для SB используем расширенные диапазоны
-        if (villainPos === 'sb') {
-            if (threebetRangeSB.has(handCode)) {
-                return 'raise';
-            }
-            if (randomRangeSB50.has(handCode)) {
-                return 'random';
-            }
-            if (callRangeSB30.has(handCode)) {
-                return 'call';
-            }
-            if (raiseSize === 2.5 && extraCallRangeSB25.has(handCode)) {
-                return 'call';
-            }
-            return 'fold';
-        }
-        
-        // Для EP, MP, CO используем базовые диапазоны
-        if (threebetRange.has(handCode)) {
-            return 'raise';
-        }
-        
-        if (randomRange50.has(handCode)) {
-            return 'random';
-        }
-        
-        if (villainPos === 'ep') {
-            if (callRangeEP30.has(handCode)) {
-                return 'call';
-            }
-            if (raiseSize === 2.5 && extraCallRangeEP25.has(handCode)) {
-                return 'call';
-            }
-        } else if (villainPos === 'mp') {
-            if (callRangeMP30.has(handCode)) {
-                return 'call';
-            }
-            if (raiseSize === 2.5 && extraCallRangeMP25.has(handCode)) {
-                return 'call';
-            }
-        } else if (villainPos === 'co') {
-            if (callRangeCO30.has(handCode)) {
-                return 'call';
-            }
-            if (raiseSize === 2.5 && extraCallRangeCO25.has(handCode)) {
-                return 'call';
-            }
-        }
-        
-        return 'fold';
-    }
-
-    // ==================== ДИАПАЗОНЫ ДЛЯ 3BET ====================
+    
     const threebetRanges = {
         vs_ep: new Set(['AA','KK','QQ','JJ','TT','AKs','AQs','AKo']),
         vs_mp: new Set(['AA','KK','QQ','JJ','TT','99','AKs','AQs','AJs','AKo','AQo']),
@@ -348,6 +177,40 @@ document.addEventListener('DOMContentLoaded', function() {
         vs_btn: new Set(['AA','KK','QQ','JJ','TT','99','88','77','AKs','AQs','AJs','ATs','A9s','AKo','AQo','AJo','ATo']),
         vs_sb: new Set(['AA','KK','QQ','JJ','TT','99','88','77','66','AKs','AQs','AJs','ATs','A9s','A8s','AKo','AQo','AJo','ATo','A9o'])
     };
+
+    function getDefendBBAction(handCode, raiseSize, villainPos) {
+        if (villainPos === 'btn') {
+            if (threebetRangeBTN.has(handCode)) return 'raise';
+            if (randomRangeBTN50.has(handCode)) return 'random';
+            if (callRangeBTN30.has(handCode)) return 'call';
+            if (raiseSize === 2.5 && extraCallRangeBTN25.has(handCode)) return 'call';
+            return 'fold';
+        }
+        
+        if (villainPos === 'sb') {
+            if (threebetRangeSB.has(handCode)) return 'raise';
+            if (randomRangeSB50.has(handCode)) return 'random';
+            if (callRangeSB30.has(handCode)) return 'call';
+            if (raiseSize === 2.5 && extraCallRangeSB25.has(handCode)) return 'call';
+            return 'fold';
+        }
+        
+        if (threebetRange.has(handCode)) return 'raise';
+        if (randomRange50.has(handCode)) return 'random';
+        
+        if (villainPos === 'ep') {
+            if (callRangeEP30.has(handCode)) return 'call';
+            if (raiseSize === 2.5 && extraCallRangeEP25.has(handCode)) return 'call';
+        } else if (villainPos === 'mp') {
+            if (callRangeMP30.has(handCode)) return 'call';
+            if (raiseSize === 2.5 && extraCallRangeMP25.has(handCode)) return 'call';
+        } else if (villainPos === 'co') {
+            if (callRangeCO30.has(handCode)) return 'call';
+            if (raiseSize === 2.5 && extraCallRangeCO25.has(handCode)) return 'call';
+        }
+        
+        return 'fold';
+    }
 
     // ==================== ФУНКЦИИ ОТОБРАЖЕНИЯ ====================
     
@@ -358,10 +221,14 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         document.querySelectorAll('.position').forEach(pos => {
             pos.classList.remove('position--villain');
+            pos.style.borderColor = '';
+            pos.style.boxShadow = '';
         });
     }
 
     function showBetOnPosition(position, betSize) {
+        clearBetsOnTable();
+        
         const betChip = document.querySelector(`.position-wrapper--${position} .bet-chip`);
         if (betChip) {
             betChip.textContent = `${betSize} BB`;
@@ -480,12 +347,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (!bbCheckbox) return;
         
-        if (currentMode === 'rfi') {
-            if (bbLabel) bbLabel.style.display = 'none';
-            if (bbCheckbox.checked) {
-                bbCheckbox.checked = false;
-            }
-        } else if (currentMode === 'defend_bb') {
+        if (currentMode === 'rfi' || currentMode === 'defend_bb') {
             if (bbLabel) bbLabel.style.display = 'none';
             if (bbCheckbox.checked) {
                 bbCheckbox.checked = false;
@@ -497,6 +359,246 @@ document.addEventListener('DOMContentLoaded', function() {
         const visibleCheckboxes = document.querySelectorAll('.pos-check:not([style*="display: none"])');
         const allChecked = visibleCheckboxes.length === document.querySelectorAll('.pos-check:not([style*="display: none"]):checked').length;
         allPositionsCheck.checked = allChecked;
+    }
+
+    // ==================== ФУНКЦИИ РАБОТЫ С ОШИБКАМИ ====================
+    
+    function addErrorToList(handData) {
+        errorHands.unshift({
+            handCode: handData.handCode,
+            position: handData.position,
+            villainPos: handData.villainPos,
+            raiseSize: handData.raiseSize,
+            correctAction: handData.correctAction,
+            mode: handData.mode,
+            timestamp: Date.now()
+        });
+        updateErrorCountDisplay();
+        saveErrorsToLocalStorage();
+    }
+    
+    function removeErrorFromList(index) {
+        errorHands.splice(index, 1);
+        updateErrorCountDisplay();
+        saveErrorsToLocalStorage();
+    }
+    
+    function updateErrorCountDisplay() {
+        if (errorCountSpan) {
+            errorCountSpan.textContent = errorHands.length;
+        }
+    }
+    
+    function saveErrorsToLocalStorage() {
+        localStorage.setItem('pokerErrors', JSON.stringify(errorHands));
+    }
+    
+    function loadErrorsFromLocalStorage() {
+        const saved = localStorage.getItem('pokerErrors');
+        if (saved) {
+            errorHands = JSON.parse(saved);
+            updateErrorCountDisplay();
+        }
+    }
+    
+    function generateHandFromCode(handCode) {
+        const rank1 = handCode[0];
+        const rank2 = handCode[1];
+        const isSuited = handCode.includes('s');
+        const isPair = (rank1 === rank2);
+        
+        let card1 = { rank: rank1, suit: suits[0] };
+        let card2 = { rank: rank2, suit: suits[0] };
+        
+        if (isPair) {
+            let suit1, suit2;
+            do {
+                suit1 = suits[Math.floor(Math.random() * suits.length)];
+                suit2 = suits[Math.floor(Math.random() * suits.length)];
+            } while (suit1.name === suit2.name);
+            card1.suit = suit1;
+            card2.suit = suit2;
+        } else if (isSuited) {
+            const suit = suits[Math.floor(Math.random() * suits.length)];
+            card1.suit = suit;
+            card2.suit = suit;
+        } else {
+            let suit1, suit2;
+            do {
+                suit1 = suits[Math.floor(Math.random() * suits.length)];
+                suit2 = suits[Math.floor(Math.random() * suits.length)];
+            } while (suit1.name === suit2.name);
+            card1.suit = suit1;
+            card2.suit = suit2;
+        }
+        
+        return [card1, card2];
+    }
+    
+    function startErrorReview() {
+        if (errorHands.length === 0) {
+            showTemporaryMessage('🎉 Отличная работа! Нет ошибок для повторения!', '#00ff9d');
+            statsModal.style.display = 'none';
+            return;
+        }
+        
+        isErrorMode = true;
+        currentErrorIndex = 0;
+        
+        if (errorModeIndicator) {
+            errorModeIndicator.style.display = 'inline-block';
+        }
+        
+        statsModal.style.display = 'none';
+        setupPanel.style.display = 'none';
+        gamePanel.style.display = 'block';
+        
+        clearBetsOnTable();
+        resultPanel.classList.remove('active');
+        resultMessage.innerHTML = '';
+        
+        loadErrorForReview();
+    }
+    
+    function loadErrorForReview() {
+        if (currentErrorIndex >= errorHands.length) {
+            finishErrorReview();
+            return;
+        }
+        
+        clearBetsOnTable();
+        resultPanel.classList.remove('active');
+        resultMessage.innerHTML = '';
+        
+        const error = errorHands[currentErrorIndex];
+        currentMode = error.mode;
+        
+        const cards = generateHandFromCode(error.handCode);
+        
+        currentHand = {
+            cards: cards,
+            position: error.position,
+            handCode: error.handCode,
+            correctAction: error.correctAction,
+            situation: {
+                heroPos: error.position,
+                villainPos: error.villainPos,
+                raiseSize: error.raiseSize
+            },
+            isErrorReview: true,
+            errorIndex: currentErrorIndex
+        };
+        currentHandResolved = false;
+        
+        currentPositionEl.innerHTML = `<strong>${positionNames[error.position]}</strong>`;
+        
+        document.querySelectorAll('.position').forEach(pos => {
+            pos.classList.remove('position--active');
+            if (pos.dataset.pos === error.position) {
+                pos.classList.add('position--active');
+            }
+        });
+        
+        renderHand(cards);
+        
+        let actionText = '';
+        if (error.mode === 'defend_bb') {
+            actionText = `🔄 ПОВТОР: ${positionNames[error.villainPos]} открылся ${error.raiseSize}bb. Защита BB.`;
+            showBetOnPosition(error.villainPos, error.raiseSize);
+        } else if (error.mode === '3bet') {
+            actionText = `🔄 ПОВТОР: ${positionNames[error.villainPos]} открылся ${error.raiseSize}bb. Ваш 3-бет?`;
+            showBetOnPosition(error.villainPos, error.raiseSize);
+        } else if (error.mode === 'rfi') {
+            actionText = `🔄 ПОВТОР: Все сбросили. Ваша позиция: ${positionNames[error.position]}. RFI?`;
+            clearBetsOnTable();
+        } else {
+            actionText = `🔄 ПОВТОР ошибки. Ваше действие?`;
+        }
+        
+        situationInfo.innerHTML = actionText;
+        renderActions(error.mode, { raiseSize: error.raiseSize });
+    }
+    
+    function finishErrorReview() {
+        isErrorMode = false;
+        currentErrorIndex = 0;
+        
+        if (errorModeIndicator) {
+            errorModeIndicator.style.display = 'none';
+        }
+        
+        if (errorHands.length > 0) {
+            showTemporaryMessage(`✅ Работа над ошибками завершена! Осталось ошибок: ${errorHands.length}. Продолжайте тренировку.`, '#00ff9d', 3000);
+        } else {
+            showTemporaryMessage(`🎉 Отлично! Все ошибки исправлены!`, '#00ff9d', 3000);
+        }
+        
+        startNewHand();
+    }
+    
+    function finishErrorReviewAndExit() {
+        isErrorMode = false;
+        currentErrorIndex = 0;
+        
+        if (errorModeIndicator) {
+            errorModeIndicator.style.display = 'none';
+        }
+        
+        showTemporaryMessage(`Выход из режима работы над ошибками`, '#ffd700', 1500);
+        startNewHand();
+    }
+    
+    function showTemporaryMessage(message, color, duration = 2000, callback = null) {
+        resultMessage.innerHTML = message;
+        resultMessage.style.color = color;
+        resultPanel.classList.add('active');
+        setTimeout(() => {
+            resultPanel.classList.remove('active');
+            if (callback) callback();
+        }, duration);
+    }
+    
+    function handleAnswerInErrorMode(selectedAction) {
+        if (currentHandResolved) return;
+        
+        const error = errorHands[currentErrorIndex];
+        const isCorrect = (selectedAction === error.correctAction);
+        const actionNames = { fold: 'ФОЛД', call: 'КОЛЛ', raise: 'РЕЙЗ', '3bet': '3БЕТ', '4bet': '4БЕТ', random: '50/50' };
+        
+        if (isCorrect) {
+            removeErrorFromList(currentErrorIndex);
+            resultMessage.innerHTML = `✅ ПРАВИЛЬНО! Ошибка исправлена!`;
+            resultMessage.style.color = '#00ff9d';
+            currentHandResolved = true;
+            resultPanel.classList.add('active');
+            
+            setTimeout(() => {
+                if (currentErrorIndex < errorHands.length) {
+                    loadErrorForReview();
+                } else {
+                    finishErrorReview();
+                }
+                resultPanel.classList.remove('active');
+            }, 1000);
+        } else {
+            const correctText = actionNames[error.correctAction] || error.correctAction;
+            resultMessage.innerHTML = `❌ СНОВА НЕПРАВИЛЬНО!<br>Правильно: ${correctText}`;
+            resultMessage.style.color = '#ff9999';
+            currentHandResolved = true;
+            resultPanel.classList.add('active');
+            currentErrorIndex++;
+            
+            setTimeout(() => {
+                if (currentErrorIndex < errorHands.length) {
+                    loadErrorForReview();
+                } else {
+                    finishErrorReview();
+                }
+                resultPanel.classList.remove('active');
+            }, 2000);
+        }
+        
+        updateErrorCountDisplay();
     }
 
     // ==================== ОСНОВНЫЕ ФУНКЦИИ ====================
@@ -564,14 +666,26 @@ document.addEventListener('DOMContentLoaded', function() {
     function resetStats() {
         stats = { total: 0, correct: 0 };
         sessionStats = { total: 0, correct: 0 };
+        errorHands = [];
         saveStats();
+        saveErrorsToLocalStorage();
         updateGlobalStatsModal();
         updateSessionStatsUI();
+        updateErrorCountDisplay();
         resultPanel.classList.remove('active');
         if (gamePanel.style.display === 'block') startNewHand();
+        showTemporaryMessage('🗑 Статистика и ошибки сброшены', '#00ff9d', 2000);
     }
     
     function resetToSetupScreen() {
+        if (isErrorMode) {
+            isErrorMode = false;
+            currentErrorIndex = 0;
+            if (errorModeIndicator) {
+                errorModeIndicator.style.display = 'none';
+            }
+            clearBetsOnTable();
+        }
         setupPanel.style.display = 'flex';
         gamePanel.style.display = 'none';
         currentHand = null;
@@ -579,11 +693,11 @@ document.addEventListener('DOMContentLoaded', function() {
         resultPanel.classList.remove('active');
         clearBetsOnTable();
         updatePositionsVisibility();
-        console.log('Возврат на экран настроек');
     }
 
     function startNewHand() {
-        if (selectedPositions.length === 0) return;
+        if (selectedPositions.length === 0 && !isErrorMode) return;
+        if (isErrorMode) return;
         
         clearBetsOnTable();
         
@@ -639,20 +753,33 @@ document.addEventListener('DOMContentLoaded', function() {
         renderActions(currentMode, context);
         resultPanel.classList.remove('active');
         resultMessage.innerHTML = '';
-        
-        console.log(`Режим: ${currentMode}, Рука: ${situation.handCode}, Герой: ${situation.heroPos}, Оппонент: ${situation.villainPos || '—'}, Действие: ${situation.correctAction}`);
     }
 
     function handleAnswer(selectedAction) {
         if (currentHandResolved) return;
         if (!currentHand) return;
         
-        let isCorrect = (selectedAction === currentHand.correctAction);
+        if (isErrorMode) {
+            handleAnswerInErrorMode(selectedAction);
+            return;
+        }
         
+        let isCorrect = (selectedAction === currentHand.correctAction);
         currentHandResolved = true;
         
         stats.total++;
-        if (isCorrect) stats.correct++;
+        if (isCorrect) {
+            stats.correct++;
+        } else {
+            addErrorToList({
+                handCode: currentHand.handCode,
+                position: currentHand.position,
+                villainPos: currentHand.situation?.villainPos,
+                raiseSize: currentHand.situation?.raiseSize,
+                correctAction: currentHand.correctAction,
+                mode: currentMode
+            });
+        }
         sessionStats.total++;
         if (isCorrect) sessionStats.correct++;
         
@@ -667,17 +794,27 @@ document.addEventListener('DOMContentLoaded', function() {
             resultMessage.style.color = '#00ff9d';
         } else {
             let correctText = actionNames[currentHand.correctAction] || currentHand.correctAction;
-            resultMessage.innerHTML = `❌ НЕПРАВИЛЬНО!<br>Вы: ${actionNames[selectedAction]} | Правильно: ${correctText}`;
+            resultMessage.innerHTML = `❌ НЕПРАВИЛЬНО!<br>Правильно: ${correctText}`;
             resultMessage.style.color = '#ff9999';
         }
         
         resultPanel.classList.add('active');
     }
 
-    // ---------- ИНИЦИАЛИЗАЦИЯ ----------
+    // ==================== ИНИЦИАЛИЗАЦИЯ ====================
     function initModeButtons() {
         document.querySelectorAll('.mode-btn').forEach(btn => {
             btn.addEventListener('click', () => {
+                if (isErrorMode) {
+                    isErrorMode = false;
+                    currentErrorIndex = 0;
+                    if (errorModeIndicator) {
+                        errorModeIndicator.style.display = 'none';
+                    }
+                    clearBetsOnTable();
+                    showTemporaryMessage('Выход из режима работы над ошибками', '#ffd700', 1500);
+                }
+                
                 document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 currentMode = btn.dataset.mode;
@@ -689,7 +826,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 
                 updatePositionsVisibility();
-                console.log('Режим изменён на:', currentMode);
+                
+                if (gamePanel.style.display === 'block') {
+                    startNewHand();
+                }
             });
         });
     }
@@ -700,7 +840,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 selectedRaiseSize = btn.dataset.size;
-                console.log('Размер рейза:', selectedRaiseSize);
             });
         });
     }
@@ -735,7 +874,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         if (selectedPositions.length === 0) {
-            alert('❌ Выберите хотя бы одну позицию!');
+            showTemporaryMessage('❌ Выберите хотя бы одну позицию!', '#ff6666', 2000);
             return;
         }
         
@@ -754,13 +893,36 @@ document.addEventListener('DOMContentLoaded', function() {
     
     closeModalBtn.addEventListener('click', () => statsModal.style.display = 'none');
     resetStatsBtn.addEventListener('click', resetStats);
+    
+    if (reviewErrorsBtn) {
+        reviewErrorsBtn.addEventListener('click', startErrorReview);
+    }
+    
     window.addEventListener('click', (e) => { if (e.target === statsModal) statsModal.style.display = 'none'; });
-    nextBtn.addEventListener('click', startNewHand);
+    
+    nextBtn.addEventListener('click', () => {
+        if (isErrorMode) {
+            currentErrorIndex++;
+            if (currentErrorIndex < errorHands.length) {
+                loadErrorForReview();
+                resultPanel.classList.remove('active');
+            } else {
+                finishErrorReview();
+            }
+        } else {
+            resultPanel.classList.remove('active');
+            startNewHand();
+        }
+    });
+    
+    if (foldBtn) foldBtn.addEventListener('click', () => handleAnswer('fold'));
+    if (raiseBtn) raiseBtn.addEventListener('click', () => handleAnswer('raise'));
     
     initModeButtons();
     initSizeButtons();
     loadStats();
+    loadErrorsFromLocalStorage();
     updatePositionsVisibility();
     
-    console.log('✅ Тренажёр готов! Добавлены диапазоны для защиты BB против EP, MP, CO, BTN, SB');
+    console.log('✅ Тренажёр готов!');
 });
